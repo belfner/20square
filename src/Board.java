@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Board implements Comparable<Board>
 {
-    private Random r = new Random(2431421);
+    private final Random r = new Random(2431421);
     private int stateID = 0;
     private int parentID = -1;
     private int[] board;
@@ -12,9 +12,9 @@ public class Board implements Comparable<Board>
     private int hn = 0;
     private int fn = 0;
     private int priorityValue = 0;
-    private int width;
-    private int height;
-    private int boardLen;
+    private final int width;
+    private final int height;
+    private final int boardLen;
     private String hash = null;
     private Board parentBoard = null;
     private int depth = 0;
@@ -48,12 +48,12 @@ public class Board implements Comparable<Board>
     }
 
     //used to find a numbers position on the board array
-    public int getIndex(int n)
+    private int getIndex()
     {
         int x;
         for (x = 0; x < this.boardLen; x++)
         {
-            if (this.board[x] == n)
+            if (this.board[x] == 0)
             {
                 break;
             }
@@ -64,7 +64,7 @@ public class Board implements Comparable<Board>
     public Board[] getNextStates(int nextID)
     {
         //gets the position of the blank square
-        int ind = getIndex(0);
+        int ind = getIndex();
 
         //get x and y position of blank square based on position
         int x = ind % this.width;
@@ -89,10 +89,10 @@ public class Board implements Comparable<Board>
             //checks if a tile 10 or greater was moved
             if (newBoard[ind] > 9)
             {                                                                                           //If it was 2 is added to the next square's g(n)
-                nexMoves[0] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 2, depth + 1, this,0);
+                nexMoves[0] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 2, depth + 1, this, 0);
             } else
             {                                                                                          //If not, 1 is added to the next square's g(n)
-                nexMoves[0] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 1, depth + 1, this,0);
+                nexMoves[0] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 1, depth + 1, this, 0);
             }
         }
 
@@ -108,10 +108,10 @@ public class Board implements Comparable<Board>
 
             if (newBoard[ind] > 9)
             {
-                nexMoves[2] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 2, depth + 1, this,2);
+                nexMoves[2] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 2, depth + 1, this, 2);
             } else
             {
-                nexMoves[2] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 1, depth + 1, this,2);
+                nexMoves[2] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 1, depth + 1, this, 2);
             }
         }
         //Checks if down move is possible
@@ -126,10 +126,10 @@ public class Board implements Comparable<Board>
 
             if (newBoard[ind] > 9)
             {
-                nexMoves[1] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 2, depth + 1, this,1);
+                nexMoves[1] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 2, depth + 1, this, 1);
             } else
             {
-                nexMoves[1] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 1, depth + 1, this,1);
+                nexMoves[1] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 1, depth + 1, this, 1);
             }
         }
 
@@ -145,10 +145,10 @@ public class Board implements Comparable<Board>
 
             if (newBoard[ind] > 9)
             {
-                nexMoves[3] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 2, depth + 1, this,3);
+                nexMoves[3] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 2, depth + 1, this, 3);
             } else
             {
-                nexMoves[3] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 1, depth + 1, this,3);
+                nexMoves[3] = new Board(nextID, this.stateID, newBoard, this.width, this.height, this.gn + 1, depth + 1, this, 3);
             }
         }
 
@@ -244,7 +244,7 @@ public class Board implements Comparable<Board>
     }
 
 
-    public int getPriorityValue()
+    private int getPriorityValue()
     {
         return priorityValue;
     }
@@ -257,47 +257,45 @@ public class Board implements Comparable<Board>
     @Override
     public String toString()
     {
-        String ret = "";
-        ret+=("ID: " +stateID);
-        if(!ltd)
+        StringBuilder ret = new StringBuilder("Move: ");
+
+        if (move == 0)
         {
-            ret+=("\nParent ID: "+parentID);
-        }
-        ret+="\n";
-        if(move == 0)
+            ret.append("LEFT\n");
+        } else if (move == 2)
         {
-            ret+="LEFT\n";
-        }
-        else if(move == 2)
+            ret.append("RIGHT\n");
+        } else if (move == 1)
         {
-            ret+="RIGHT\n";
-        }
-        else if(move == 1)
+            ret.append("DOWN\n");
+        } else if (move == 3)
         {
-            ret+="DOWN\n";
+            ret.append("UP\n");
         }
-        else if(move == 3)
+        ret.append("ID: ").append(stateID);
+        if (!ltd)
         {
-            ret+="UP\n";
+            ret.append("\nParent ID: ").append(parentID);
         }
+        ret.append("\n");
         for (int y = 0; y < this.height; y++)
         {
             for (int x = 0; x < this.width; x++)
             {
-                ret += (String.format("%2s", Integer.toString(this.board[x + y * this.width])) + " ");
+                ret.append(String.format("%2s", Integer.toString(this.board[x + y * this.width]))).append(" ");
             }
-            ret = ret.substring(0, ret.length() - 1) + "\n";
+            ret = new StringBuilder(ret.substring(0, ret.length() - 1) + "\n");
         }
-        if(!ltd)
+        if (!ltd)
         {
-            ret += ("Depth: " + Integer.toString(depth) + "\n");
-            if(fn != 0) {
-                ret += ("G(n): " + Integer.toString(gn) + "\n");
-                ret += ("H(n): " + Integer.toString(hn) + "\n");
-            }
-            ret += ("Priority Value: " + Integer.toString(priorityValue) + "\n");
+            ret.append("Depth: ").append(depth).append("\n");
+            ret.append("G(n): ").append(gn).append("\n");
+            ret.append("H(n): ").append(hn).append("\n");
+            ret.append("F(n): ").append(fn).append("\n");
+            ret.append("Priority Value: ").append(priorityValue).append("\n");
         }
-        return ret;
+        ret.append("--------------------------");
+        return ret.toString();
     }
 
 
@@ -310,6 +308,9 @@ public class Board implements Comparable<Board>
         return Arrays.equals(getBoard(), board1.getBoard());
     }
 
+    //used with hash array
+    //turns board into a string and returns it
+    //hash is saved for successive calls
     public String hash()
     {
         if (hash != null)
@@ -328,16 +329,7 @@ public class Board implements Comparable<Board>
     @Override
     public int compareTo(Board b)
     {
-        if (priorityValue > b.getPriorityValue())
-        {
-            return 1;
-        } else if (priorityValue < b.getPriorityValue())
-        {
-            return -1;
-        } else
-        {
-            return 0;
-        }
+        return Integer.compare(priorityValue, b.getPriorityValue());
     }
 
 

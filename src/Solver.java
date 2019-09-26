@@ -2,34 +2,44 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Solver
+class Solver
 {
-    private int width;
-    private int height;
-    private SortedList open;
-    private Map<String, Board> closed;
-    private Board start;
-    private Board goal;
+    private final int width;
+    private final SortedList open;
+    private final Map<String, Board> closed;
+    private final Board goal;
     private Board finalBoard;
     private Boolean pathFound;
     private int currID;
-    private String sortingMethod;
-    private int boardLength;
+    private final String sortingMethod;
+    private final int boardLength;
 
 
     public Solver(int[] start, int[] goal, int width, int height, String sortingMethod)
     {
         this.width = width;
-        this.height = height;
         boardLength = width * height;
         this.sortingMethod = sortingMethod;
-        this.start = new Board(start, width, height);
+        Board start1 = new Board(start, width, height);
         this.goal = new Board(goal, width, height);
         pathFound = false;
         currID = 0;
         open = new SortedList();
         closed = new HashMap<>();
-        addToOpen(this.start);
+        addToOpen(start1);
+        switch (sortingMethod)
+        {
+            case "Bfs":
+                System.out.println("Breadth First Search");
+                break;
+            case "A*1":
+                System.out.println("A* using heuristic 1");
+                break;
+            case "A*2":
+                System.out.println("A* using heuristic 2");
+                break;
+        }
+        System.out.println("--------------------------");
 
     }
 
@@ -93,44 +103,9 @@ public class Solver
         }
         return score;
     }
+
     // calculates manhattan distance
     private int boardComparison2(Board b0, Board b1)
-        {
-            int score = 0;
-            int[] a0 = b0.getBoard();
-            int[] a1 = b1.getBoard();
-            int dist;
-            int y, x;
-            for (x = 0; x < boardLength; x++)
-            {
-
-                if (a1[x] != 0)
-                {
-                    dist = 0;
-                    for (y = 0; y < boardLength; y++)
-                    {
-                        if (a0[y] == a1[x])
-                        {
-                            break;
-                        }
-                    }
-                    dist += Math.abs(y % width - x % width);
-                    dist += Math.abs(y / width - x / width);
-                    if (a1[x] > 9)
-                    {
-                        score += 2 * dist;
-                    } else
-                    {
-                        score += dist;
-                    }
-                }
-
-
-            }
-            return score;
-    }
-
-    private int boardComparison3(Board b0, Board b1)
     {
         int score = 0;
         int[] a0 = b0.getBoard();
@@ -152,7 +127,13 @@ public class Solver
                 }
                 dist += Math.abs(y % width - x % width);
                 dist += Math.abs(y / width - x / width);
-                score+=dist;
+                if (a1[x] > 9)
+                {
+                    score += 2 * dist;
+                } else
+                {
+                    score += dist;
+                }
             }
 
 
@@ -164,22 +145,19 @@ public class Solver
     private void addToOpen(Board b)
     {
         //checks for type of search method then calculates priority value along with other required values for the search type
-        if (sortingMethod.equals("Bfs"))
+        switch (sortingMethod)
         {
-            b.setPriorityValue(b.getDepth());
-        } else if (sortingMethod.equals("A*1"))
-        {
-            b.setHn(boardComparison1(goal, b));
-            b.setFnAndPriority(b.getGn() + b.getHn());
-        } else if (sortingMethod.equals("A*2"))
-        {
-            b.setHn(boardComparison2(goal, b));
-            b.setFnAndPriority(b.getGn() + b.getHn());
-        }
-        else if (sortingMethod.equals("A*3"))
-        {
-            b.setHn(boardComparison3(goal, b));
-            b.setFnAndPriority(b.getDepth() + b.getHn());
+            case "Bfs":
+                b.setPriorityValue(b.getDepth());
+                break;
+            case "A*1":
+                b.setHn(boardComparison1(goal, b));
+                b.setFnAndPriority(b.getGn() + b.getHn());
+                break;
+            case "A*2":
+                b.setHn(boardComparison2(goal, b));
+                b.setFnAndPriority(b.getGn() + b.getHn());
+                break;
         }
 
         //checks for equality with goal state
@@ -212,16 +190,9 @@ public class Solver
         {
             System.out.println(b);
         }
-        System.out.println("Solution length: " + (solutionPath.size() - 1));
-        System.out.println("Items added to open list: " + (open.size()+closed.size()));
-        System.out.println("Items added to closed list: " + closed.size());
-    }
 
-    public void printOpened()
-    {
-        while (open.size() > 0)
-        {
-            System.out.println(open.next());
-        }
+        System.out.println("Solution length: " + (solutionPath.size() - 1));
+        System.out.println("Items added to open list: " + (open.size() + closed.size()));
+        System.out.println("Items added to closed list: " + closed.size());
     }
 }
